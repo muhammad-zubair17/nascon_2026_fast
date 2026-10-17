@@ -182,3 +182,8 @@ frontend/
 ## Ideas for next
 
 A "Go deeper" button that explains any story at beginner level, a daily mini-quiz on your own paper, an audio edition, and real accounts.
+
+## Live demo:
+https://the-daily-you.onrender.com 
+(the free host sleeps when idle, so the first load can take about 40 seconds)
+

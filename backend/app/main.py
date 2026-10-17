@@ -1,3 +1,5 @@
+from fastapi.responses import Response
+from .pdf import build_pdf
 import json
 from .edition import get_or_create
 from contextlib import asynccontextmanager
@@ -106,3 +108,17 @@ def log_event(uid: int, body: EventIn):
         c.execute("INSERT INTO events (user_id, article_id, type) VALUES (?, ?, ?)",
                   (uid, body.article_id, body.type))
     return {"ok": True}
+@app.get("/api/editions/{eid}/pdf")
+def edition_pdf(eid: int):
+    with get_conn() as c:
+        r = c.execute("SELECT * FROM editions WHERE id=?", (eid,)).fetchone()
+        if not r:
+            raise HTTPException(404, "Edition not found")
+        skipped = {x["article_id"] for x in c.execute(
+            "SELECT article_id FROM events WHERE user_id=? AND type='skip'",
+            (r["user_id"],))}
+    data = build_pdf(json.loads(r["content"]), skipped)
+    return Response(
+        data, media_type="application/pdf",
+        headers={"Content-Disposition":
+                 f'attachment; filename="the-daily-you-{r["date"]}.pdf"'})

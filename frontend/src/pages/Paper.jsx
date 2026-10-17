@@ -70,6 +70,9 @@ export default function Paper() {
         <nav>
           <Link to="/">Today</Link>
           <Link to="/archive">Archive</Link>
+          <a href={`/api/editions/${ed.id}/pdf`} target="_blank" rel="noopener noreferrer">
+            Download PDF
+          </a>
           <a href="#" onClick={(e) => { e.preventDefault(); clearUid(); nav('/welcome') }}>New reader</a>
         </nav>
       </div>

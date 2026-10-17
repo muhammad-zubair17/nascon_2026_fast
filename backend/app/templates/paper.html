@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<style>
+@page { size: A4; margin: 11mm 12mm; }
+* { box-sizing: border-box; }
+body { margin: 0; color: #1a1a1a; background: #fff; font-size: 9.5pt; line-height: 1.4;
+  font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, .kicker { font-family: 'Playfair Display', Georgia, serif; }
+.masthead { text-align: center; border-bottom: 3px double #1a1a1a; padding-bottom: 4px; }
+.masthead h1 { margin: 0; font-size: 50pt; font-weight: 900; letter-spacing: -1px; line-height: 1.05; }
+.dateline { display: flex; justify-content: space-between; border-bottom: 1px solid #1a1a1a;
+  padding: 3px 0; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .1em; }
+.note { text-align: center; font-style: italic; color: #555; margin: 8px 30px; font-size: 10pt; }
+.front { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-top: 8px; }
+.main { border-right: 1px solid #1a1a1a; padding-right: 14px; }
+.kicker { font-size: 6.5pt; text-transform: uppercase; letter-spacing: .12em; color: #9b2c1d; font-weight: 700; }
+.src { font-size: 7pt; color: #777; margin-top: 3px; }
+.hero h2 { font-size: 25pt; font-weight: 900; line-height: 1.08; margin: 2px 0 6px; }
+.hero p { font-size: 10.5pt; margin: 0; }
+.hero img { width: 100%; max-height: 62mm; object-fit: cover; margin-bottom: 5px; }
+.secondary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 14px; margin-top: 12px;
+  border-top: 1px solid #1a1a1a; padding-top: 10px; }
+.secondary .story h3 { font-size: 11pt; }
+.secondary .story p { font-size: 8.5pt; }
+.story { break-inside: avoid; }
+.story h3 { font-size: 12pt; font-weight: 700; line-height: 1.15; margin: 1px 0 3px; }
+.story p { margin: 0; font-size: 9pt; }
+.story img { width: 100%; height: 30mm; object-fit: cover; margin-bottom: 4px; }
+.box { border: 1.5px solid #1a1a1a; padding: 8px 10px; margin-bottom: 12px; }
+.box h3 { margin: 0 0 6px; font-size: 11pt; border-bottom: 1px solid #1a1a1a; padding-bottom: 3px; }
+.box ol { margin: 0; padding-left: 16px; }
+.box li { margin-bottom: 5px; font-size: 9pt; }
+.briefs { column-count: 3; column-gap: 14px; column-rule: 1px solid #1a1a1a;
+  margin-top: 12px; border-top: 3px double #1a1a1a; padding-top: 8px; }
+.briefs .story { margin-bottom: 10px; }
+.briefs .story h3 { font-size: 10.5pt; }
+.briefs .story p { font-size: 8.5pt; }
+.foot { text-align: center; font-size: 7pt; color: #777; margin-top: 10px;
+  border-top: 1px solid #1a1a1a; padding-top: 4px; }
+</style>
+</head>
+<body>
+<div class="masthead"><h1>{{ paper_name }}</h1></div>
+<div class="dateline"><span>{{ date }}</span><span>Prepared for {{ reader }}</span></div>
+{% if editor_note %}<p class="note">{{ editor_note }}</p>{% endif %}
+
+<div class="front">
+  <div class="main">
+    {% if hero %}
+    <div class="hero">
+      {% if hero.image_url %}<img src="{{ hero.image_url }}" onerror="this.remove()">{% endif %}
+      <div class="kicker">{{ hero.topic }}</div>
+      <h2><a href="{{ hero.url }}">{{ hero.headline }}</a></h2>
+      <p>{{ hero.blurb }}</p>
+      <div class="src">{{ hero.source }}</div>
+    </div>
+    {% endif %}
+  </div>
+  <aside>
+    {% if three_things %}
+    <div class="box">
+      <h3>3 things you learned today</h3>
+      <ol>{% for t in three_things %}<li>{{ t }}</li>{% endfor %}</ol>
+    </div>
+    {% endif %}
+    {% for s in stretch %}
+    <div class="box">
+      <h3>Outside your bubble</h3>
+      <div class="story">
+        <div class="kicker">{{ s.topic }}</div>
+        <h3 style="border:0;padding:0"><a href="{{ s.url }}">{{ s.headline }}</a></h3>
+        <p>{{ s.blurb }}</p>
+        <div class="src">{{ s.source }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </aside>
+</div>
+<div class="secondary">
+      {% for s in secondary %}
+      <div class="story">
+        {% if s.image_url %}<img src="{{ s.image_url }}" onerror="this.remove()">{% endif %}
+        <div class="kicker">{{ s.topic }}</div>
+        <h3><a href="{{ s.url }}">{{ s.headline }}</a></h3>
+        <p>{{ s.blurb }}</p>
+        <div class="src">{{ s.source }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+<div class="briefs">
+  {% for s in briefs %}
+  <div class="story">
+    <div class="kicker">{{ s.topic }}</div>
+    <h3><a href="{{ s.url }}">{{ s.headline }}</a></h3>
+    <p>{{ s.blurb }}</p>
+    <div class="src">{{ s.source }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="foot">{{ paper_name }} · A personal paper made for {{ reader }} · Headlines link to the original articles</div>
+</body>
+</html>

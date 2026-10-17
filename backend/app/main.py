@@ -17,6 +17,8 @@ from .feeds import FEEDS
 @asynccontextmanager
 async def lifespan(app):
     init_db()
+    from .daily import start_scheduler
+    start_scheduler()
     yield
 
 

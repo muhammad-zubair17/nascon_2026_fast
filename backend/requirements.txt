@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+feedparser
+google-genai
+python-dotenv
+playwright
+jinja2
+numpy
+httpx
+pytest

@@ -93,3 +93,16 @@ def one_edition(eid: int):
     if not r:
         raise HTTPException(404, "Edition not found")
     return {"id": r["id"], "date": r["date"], "content": json.loads(r["content"])}
+class EventIn(BaseModel):
+    article_id: int
+    type: str  # "click" or "skip"
+
+
+@app.post("/api/users/{uid}/events")
+def log_event(uid: int, body: EventIn):
+    if body.type not in ("click", "skip"):
+        raise HTTPException(400, "type must be click or skip")
+    with get_conn() as c:
+        c.execute("INSERT INTO events (user_id, article_id, type) VALUES (?, ?, ?)",
+                  (uid, body.article_id, body.type))
+    return {"ok": True}

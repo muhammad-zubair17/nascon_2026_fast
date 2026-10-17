@@ -2,6 +2,7 @@
 .venv/
 node_modules/
 *.db
+!backend/seed/seed.db
 __pycache__/
 .next/
 .pytest_cache/

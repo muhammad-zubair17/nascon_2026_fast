@@ -1,8 +1,14 @@
 import sqlite3
+import shutil
 from pathlib import Path
 
 DB_PATH = Path(__file__).resolve().parent.parent / "paper.db"
+SEED_PATH = Path(__file__).resolve().parent.parent / "seed" / "seed.db"
 
+
+def seed_if_missing():
+    if not DB_PATH.exists() and SEED_PATH.exists():
+        shutil.copyfile(SEED_PATH, DB_PATH)
 
 def get_conn():
     conn = sqlite3.connect(DB_PATH, timeout=30)

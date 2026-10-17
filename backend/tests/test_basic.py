@@ -8,6 +8,7 @@ from app import db
 @pytest.fixture()
 def client(tmp_path, monkeypatch):
     monkeypatch.setattr(db, "DB_PATH", tmp_path / "test.db")
+    monkeypatch.setattr(db, "SEED_PATH", tmp_path / "no-seed.db")
     from app.main import app
     with TestClient(app) as c:
         yield c

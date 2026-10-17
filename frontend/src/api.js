@@ -1,5 +1,9 @@
 const j = async (r) => {
-  if (!r.ok) throw new Error(await r.text())
+  if (!r.ok) {
+    const e = new Error(await r.text())
+    e.status = r.status
+    throw e
+  }
   return r.json()
 }
 const post = (url, body) =>

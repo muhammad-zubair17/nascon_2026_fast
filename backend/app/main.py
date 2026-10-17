@@ -10,12 +10,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from .ai import embed_texts
-from .db import get_conn, init_db
+from .db import get_conn, init_db, seed_if_missing
 from .feeds import FEEDS
 
 
 @asynccontextmanager
 async def lifespan(app):
+    seed_if_missing()
     init_db()
     from .daily import start_scheduler
     start_scheduler()
@@ -70,6 +71,9 @@ def get_user(uid: int):
     return {**dict(u), "topics": [dict(x) for x in t]}
 @app.post("/api/users/{uid}/edition")
 def make_edition(uid: int, force: bool = False):
+    with get_conn() as c:
+        if not c.execute("SELECT 1 FROM users WHERE id=?", (uid,)).fetchone():
+            raise HTTPException(404, "User not found")
     try:
         return get_or_create(uid, force)
     except ValueError as e:
@@ -126,3 +130,18 @@ def edition_pdf(eid: int):
         data, media_type="application/pdf",
         headers={"Content-Disposition":
                  f'attachment; filename="the-daily-you-{r["date"]}.pdf"'})
+from pathlib import Path
+
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
+STATIC = Path(__file__).resolve().parent.parent / "static"
+if STATIC.exists():
+    app.mount("/assets", StaticFiles(directory=STATIC / "assets"), name="assets")
+
+    @app.get("/{path:path}")
+    def spa(path: str):
+        f = STATIC / path
+        if path and f.is_file():
+            return FileResponse(f)
+        return FileResponse(STATIC / "index.html")

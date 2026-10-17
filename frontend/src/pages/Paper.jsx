@@ -35,7 +35,10 @@ export default function Paper() {
     if (!uid) { nav('/welcome', { replace: true }); return }
     setEd(null); setErr('')
     const req = id ? getEdition(id) : todayEdition(uid)
-    req.then(setEd).catch(() => setErr('Could not load your paper. Is the backend running?'))
+    req.then(setEd).catch((e) => {
+      if (e.status === 404 && !id) { clearUid(); nav('/welcome', { replace: true }) }
+      else setErr('Could not load your paper. Is the backend running?')
+    })
   }, [id])
 
   if (err) return <div className="center"><p className="err">{err}</p></div>

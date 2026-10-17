@@ -10,7 +10,7 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 EMBED_MODEL = "gemini-embedding-001"
-GEN_MODEL = "gemini-2.5-flash"
+GEN_MODEL = "gemini-3.8-flash"
 
 
 def embed_texts(texts):

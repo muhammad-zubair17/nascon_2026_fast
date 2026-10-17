@@ -1,3 +1,5 @@
+import json
+from .edition import get_or_create
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
@@ -61,3 +63,33 @@ def get_user(uid: int):
         t = c.execute("SELECT topic, weight FROM user_topics WHERE user_id = ?",
                       (uid,)).fetchall()
     return {**dict(u), "topics": [dict(x) for x in t]}
+@app.post("/api/users/{uid}/edition")
+def make_edition(uid: int, force: bool = False):
+    try:
+        return get_or_create(uid, force)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.get("/api/users/{uid}/editions")
+def archive(uid: int):
+    with get_conn() as c:
+        rows = c.execute(
+            "SELECT id, date, content FROM editions WHERE user_id=? "
+            "ORDER BY date DESC", (uid,)).fetchall()
+    out = []
+    for r in rows:
+        data = json.loads(r["content"])
+        hero = next((s for s in data["stories"] if s["role"] == "hero"), None)
+        out.append({"id": r["id"], "date": r["date"],
+                    "headline": hero["headline"] if hero else ""})
+    return out
+
+
+@app.get("/api/editions/{eid}")
+def one_edition(eid: int):
+    with get_conn() as c:
+        r = c.execute("SELECT * FROM editions WHERE id=?", (eid,)).fetchone()
+    if not r:
+        raise HTTPException(404, "Edition not found")
+    return {"id": r["id"], "date": r["date"], "content": json.loads(r["content"])}

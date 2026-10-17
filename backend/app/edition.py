@@ -7,7 +7,7 @@ from google.genai import errors, types
 
 from .ai import GEN_MODEL, client
 from .db import get_conn
-
+from .filters import is_junk
 PAPER_NAME = "The Daily You"
 TOTAL = 14          # 1 hero + 4 secondary + 9 briefs
 MAX_PER_TOPIC = 4
@@ -52,7 +52,7 @@ def _rank(uid):
 
     scored = []
     for r in _candidates():
-        if r["id"] in seen:
+        if r["id"] in seen or is_junk(r["title"]):
             continue
         sim = float(np.dot(user_vec, np.frombuffer(r["embedding"], dtype=np.float32)))
         score = sim + 0.15 * topics.get(r["topic"], 0.0)
@@ -98,12 +98,12 @@ Return JSON only, in this shape:
  "three_things": ["...", "...", "..."]}}
 
 Rules:
-- Use ONLY facts from the articles above. Never invent details.
-- headline: punchy newspaper headline, max 12 words.
+- Use ONLY facts and names that appear in the article text above. Never add names, first names, titles, numbers, or background that are not written there. If unsure, leave it out.
+- headline: punchy newspaper headline, max 12 words, using only given facts.
 - blurb: article 0 gets 3 sentences, articles 1-4 get 2 sentences, all others 1 sentence.
 - Include an entry for every article index.
 - editor_note: 2 warm sentences addressed to {user['name']} about today's edition.
-- three_things: exactly 3 short facts the reader will have learned by reading this paper."""
+- three_things: exactly 3 short takeaways. Each must come from a DIFFERENT article, must not just repeat that article's headline (give the useful detail or context instead), and at least one must come from the last article in the list, which is the reader's "outside your bubble" pick."""
     for attempt in range(3):
         try:
             res = client.models.generate_content(
@@ -121,7 +121,7 @@ Rules:
         except Exception as e:
             print(f"LLM error: {type(e).__name__}: {e}")
             break
-        return None
+    return None
 
 
 def generate(uid):

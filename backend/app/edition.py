@@ -44,7 +44,7 @@ def _rank(uid):
         topics = {r["topic"]: r["weight"] for r in c.execute(
             "SELECT topic, weight FROM user_topics WHERE user_id=?", (uid,))}
         skipped = {r["article_id"] for r in c.execute(
-            "SELECT article_id FROM events WHERE user_id=? AND type='skip'",
+            "SELECT article_id FROM events WHERE user_id=? AND type IN ('skip','click')",
             (uid,))}
     user_vec = np.frombuffer(u["vector"], dtype=np.float32)
     seen = skipped | _recent_edition_ids(uid)

@@ -11,7 +11,7 @@ const post = (url, body) =>
 
 export const getTopics = () => fetch('/api/topics').then(j)
 export const onboard = (body) => post('/api/onboard', body)
-export const todayEdition = (uid) => post(`/api/users/${uid}/edition`)
+export const todayEdition = (uid, force = false) => post(`/api/users/${uid}/edition?force=${force}`)
 export const getEdition = (id) => fetch(`/api/editions/${id}`).then(j)
 export const getArchive = (uid) => fetch(`/api/users/${uid}/editions`).then(j)
 export const logEvent = (uid, article_id, type) =>

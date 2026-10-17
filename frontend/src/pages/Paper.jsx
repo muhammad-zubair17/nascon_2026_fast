@@ -54,6 +54,11 @@ export default function Paper() {
     logEvent(uid, sid, 'skip')
     setHidden((h) => new Set(h).add(sid))
   }
+    const refresh = () => {
+    setEd(null)
+    setHidden(new Set())
+    todayEdition(uid, true).then(setEd).catch(() => setErr('Could not refresh.'))
+  }
   const pick = (role) => c.stories.filter((s) => s.role === role && !hidden.has(s.id))
   const hero = pick('hero')[0]
   const date = new Date(c.date + 'T00:00:00').toLocaleDateString('en-GB', {
@@ -70,6 +75,9 @@ export default function Paper() {
         <nav>
           <Link to="/">Today</Link>
           <Link to="/archive">Archive</Link>
+          {!id && (
+            <a href="#" onClick={(e) => { e.preventDefault(); refresh() }}>Refresh paper</a>
+          )}
           <a href={`/api/editions/${ed.id}/pdf`} target="_blank" rel="noopener noreferrer">
             Download PDF
           </a>

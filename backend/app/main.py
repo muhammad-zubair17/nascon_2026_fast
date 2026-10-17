@@ -1,3 +1,4 @@
+from .learning import apply_event
 from fastapi.responses import Response
 from .pdf import build_pdf
 import json
@@ -107,6 +108,7 @@ def log_event(uid: int, body: EventIn):
     with get_conn() as c:
         c.execute("INSERT INTO events (user_id, article_id, type) VALUES (?, ?, ?)",
                   (uid, body.article_id, body.type))
+    apply_event(uid, body.article_id, body.type)
     return {"ok": True}
 @app.get("/api/editions/{eid}/pdf")
 def edition_pdf(eid: int):

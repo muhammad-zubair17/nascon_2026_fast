@@ -50,6 +50,7 @@ def run_daily():
 
 
 def _loop():
+    time.sleep(300)
     while True:
         try:
             last = _last_run()

@@ -7,17 +7,16 @@ from google import genai
 from google.genai import errors, types
 
 load_dotenv()
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"),
-                      http_options=types.HttpOptions(timeout=60_000))
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 EMBED_MODEL = "gemini-embedding-001"
 GEN_MODEL = "gemini-3.8-flash"
 
 
-def embed_texts(texts, max_attempts=5):
+def embed_texts(texts):
     """Embed a list of texts (keep it under ~90 per call on the free tier)."""
     res = None
-    for attempt in range(max_attempts):
+    for attempt in range(5):
         try:
             res = client.models.embed_content(
                 model=EMBED_MODEL,
@@ -28,7 +27,7 @@ def embed_texts(texts, max_attempts=5):
             )
             break
         except errors.ClientError as e:
-            if getattr(e, "code", None) == 429 and attempt < max_attempts - 1:
+            if getattr(e, "code", None) == 429 and attempt < 4:
                 print("  rate limited, waiting 55s...")
                 time.sleep(55)
             else:

@@ -28,7 +28,4 @@ export const logEvent = (uid, article_id, type) =>
 
 export const getUid = () => localStorage.getItem('uid')
 export const setUid = (id) => localStorage.setItem('uid', String(id))
-export const clearUid = () => {
-  localStorage.removeItem('uid')
-  localStorage.removeItem('profile')
-}
+export const clearUid = () => localStorage.removeItem('uid')

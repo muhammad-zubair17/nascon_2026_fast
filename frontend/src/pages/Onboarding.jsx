@@ -32,7 +32,6 @@ export default function Onboarding() {
     try {
       const u = await onboard({ name: name.trim(), topics: picked, free_text: text })
       setUid(u.user_id)
-      localStorage.setItem('profile', JSON.stringify({ name: name.trim(), topics: picked, free_text: text }))
       await todayEdition(u.user_id) // print the first edition now
       nav('/')
     } catch (e) {

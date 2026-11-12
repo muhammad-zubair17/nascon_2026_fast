@@ -115,7 +115,7 @@ Rules:
             print(f"LLM ClientError (attempt {attempt + 1}): {e}")
             if getattr(e, "code", None) == 429 and attempt < 2:
                 print("rate limited, waiting 45s...")
-                time.sleep(15)
+                time.sleep(45)
             else:
                 break
         except Exception as e:

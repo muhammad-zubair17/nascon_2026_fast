@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { clearUid, getEdition, getUid, logEvent, todayEdition } from '../api'
+import { onboard, setUid, clearUid, getEdition, getUid, logEvent, todayEdition } from '../api'
 
 function Story({ s, uid, onSkip, showImage }) {
   const [imgOk, setImgOk] = useState(true)
@@ -35,9 +35,22 @@ export default function Paper() {
     if (!uid) { nav('/welcome', { replace: true }); return }
     setEd(null); setErr('')
     const req = id ? getEdition(id) : todayEdition(uid)
-    req.then(setEd).catch((e) => {
-      if (e.status === 404 && !id) { clearUid(); nav('/welcome', { replace: true }) }
-      else setErr('Could not load your paper. Is the backend running?')
+        req.then(setEd).catch(async (e) => {
+      if (e.status === 404 && !id) {
+        try {
+          const p = JSON.parse(localStorage.getItem('profile') || 'null')
+          if (p) {
+            const u = await onboard(p)
+            setUid(u.user_id)
+            window.location.reload()
+            return
+          }
+        } catch { /* fall through */ }
+        clearUid()
+        nav('/welcome', { replace: true })
+      } else {
+        setErr('Could not load your paper. Is the backend running?')
+      }
     })
   }, [id])
 

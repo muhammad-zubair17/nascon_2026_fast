@@ -1,3 +1,4 @@
+import numpy as np
 from .learning import apply_event
 from fastapi.responses import Response
 from .pdf import build_pdf
@@ -39,13 +40,31 @@ def topics():
     return list(FEEDS.keys())
 
 
+def _topic_centroid(topics):
+    marks = ",".join("?" * len(topics))
+    with get_conn() as c:
+        rows = c.execute(
+            f"SELECT embedding FROM articles WHERE embedding IS NOT NULL "
+            f"AND topic IN ({marks}) ORDER BY id DESC LIMIT 60", topics).fetchall()
+    if not rows:
+        return None
+    v = np.mean([np.frombuffer(r["embedding"], dtype=np.float32) for r in rows], axis=0)
+    return (v / np.linalg.norm(v)).astype(np.float32)
+
+
 @app.post("/api/onboard")
 def onboard(body: Onboard):
     valid = [t for t in body.topics if t in FEEDS]
     if not valid:
         raise HTTPException(400, "Pick at least one topic")
     profile_text = f"Interested in {', '.join(valid)}. {body.free_text}".strip()
-    vec = embed_texts([profile_text])[0]
+    try:
+        vec = embed_texts([profile_text], max_attempts=1)[0]
+    except Exception as e:
+        print("onboard embedding failed, using topic centroid:", e)
+        vec = _topic_centroid(valid)
+    if vec is None:
+        raise HTTPException(503, "News is still loading, try again in a minute")
     with get_conn() as c:
         cur = c.execute(
             "INSERT INTO users (name, free_text, vector) VALUES (?, ?, ?)",
@@ -57,7 +76,6 @@ def onboard(body: Onboard):
             [(uid, t) for t in valid],
         )
     return {"user_id": uid, "name": body.name, "topics": valid}
-
 
 @app.get("/api/users/{uid}")
 def get_user(uid: int):
